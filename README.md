@@ -20,17 +20,18 @@ The following services are defined in `docker-compose.yml`:
     Build the images and start all services in detached mode.
 
     ```bash
-    docker-compose up -d --build
+    docker compose down && docker compose up -d --build && docker compose logs -f
     ```
 
 2.  **Create a CiviCRM Site:**
     Use `civibuild` inside the `civicrm` container to create a new site. For example, to create a Drupal 9 site named `d9`:
 
     ```bash
-    docker-compose exec civicrm civibuild create d9 --type drupal9
+    docker compose exec civicrm chown -R buildkit:buildkit /buildkit
+    docker compose exec -u buildkit civicrm civibuild create standalone-composer stable
     ```
 
-    The site's files will be located in the `./build/d9` directory on the host.
+    The site's files will be located in the `./build/standalone-composer` directory on the host.
 
 3.  **Access Services:**
     - **CiviCRM Site:** `http://<sitename>.localhost:7890` (e.g., `http://d9.localhost:7890`)
@@ -63,7 +64,7 @@ Update `docker-compose.yml` to use these variables:
 # docker-compose.yml
 services:
   mysql:
-    image: michaelmcandrew/civicrm-mysql:8.0
+    build: .
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_USER: ${MYSQL_USER}
